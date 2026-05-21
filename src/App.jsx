@@ -4,12 +4,16 @@ import { getAllData, getMyProfile, loadSession, onAuthChange, signOut } from './
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Inventory from './components/Inventory';
+import Members from './components/Members';
+import Vehicles from './components/Vehicles';
+import Checklists from './components/Checklists';
+import Hospitals from './components/Hospitals';
 import StockAdjustments from './components/StockAdjustments';
 import Alerts from './components/Alerts';
 import History from './components/History';
 import Settings from './components/Settings';
 
-const emptyData = { profiles: [], categories: [], locations: [], items: [], movements: [], auditLog: [] };
+const emptyData = { profiles: [], categories: [], locations: [], items: [], movements: [], auditLog: [], members: [], vehicles: [], checklists: [], hospitals: [] };
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -48,13 +52,18 @@ export default function App() {
 
   return <main className="app-shell">
     <header className="topbar">
-      <div><p className="eyebrow">EMS Program</p><h1>Inventory Management</h1><p>Supabase-backed, gated inventory system with role-based access and audit trails.</p></div>
+      <img src="/images/MLH Logo 1.png" className="logo" />
+      <div><p className="eyebrow">MAIN LINE HATZOLAH</p><h1>Inventory Management</h1><p>Supabase-backed, gated inventory system with role-based access and audit trails.</p></div>
       <div className="user-box"><ShieldCheck size={18}/><span>{profile.full_name}</span><b>{profile.role}</b><button className="secondary" onClick={refresh}><RefreshCcw size={16}/> Refresh</button><button className="secondary" onClick={() => signOut()}><LogOut size={16}/> Sign Out</button></div>
     </header>
     {error && <div className="alert danger-text">{error}</div>}
     <Dashboard items={data.items} />
-    <nav className="tabs">{[['inventory','Inventory'],['adjust','Adjust Stock'],['alerts','Alerts'],['history','Movement History'],['audit','Audit Log'],['settings','Settings']].map(([k,l]) => <button key={k} className={activeTab===k?'active':''} onClick={() => setActiveTab(k)}>{l}</button>)}</nav>
+    <nav className="tabs">{[['inventory','Inventory'],['members','Members'],['vehicles','Vehicles'],['hospitals','Hospitals'],['checklists','Checklists'],['adjust','Adjust Stock'],['alerts','Alerts'],['history','Movement History'],['audit','Audit Log'],['settings','Settings']].map(([k,l]) => <button key={k} className={activeTab===k?'active':''} onClick={() => setActiveTab(k)}>{l}</button>)}</nav>
     {activeTab === 'inventory' && <Inventory data={data} profile={profile} refresh={refresh} />}
+    {activeTab === 'members' && <Members members={data.members} profile={profile} refresh={refresh} />}
+    {activeTab === 'vehicles' && <Vehicles vehicles={data.vehicles} profile={profile} refresh={refresh} />}
+    {activeTab === 'hospitals' && <Hospitals hospitals={data.hospitals} profile={profile} refresh={refresh} />}
+    {activeTab === 'checklists' && <Checklists checklists={data.checklists} profile={profile} refresh={refresh} />}
     {activeTab === 'adjust' && <StockAdjustments data={data} profile={profile} refresh={refresh} />}
     {activeTab === 'alerts' && <Alerts items={data.items} />}
     {activeTab === 'history' && <History rows={data.movements} />}
