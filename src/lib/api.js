@@ -37,7 +37,7 @@ export async function getMyProfile() {
 
 export async function getAllData() {
   const [profiles, categories, locations, items, movements, auditLog,
-    membersRes, vehiclesRes, checklistsRes, checklistItemsRes, hospitalsRes] = await Promise.all([
+    membersRes, vehiclesRes, checklistsRes, checklistItemsRes, hospitalsRes, callLogRes] = await Promise.all([
     supabase.from('profiles').select('*').order('full_name'),
     supabase.from('categories').select('*').order('name'),
     supabase.from('locations').select('*').order('name'),
@@ -49,12 +49,13 @@ export async function getAllData() {
     supabase.from('checklists').select('*').order('target_type').order('target_value'),
     supabase.from('checklist_items').select('*').order('sort_order').order('created_at'),
     supabase.from('hospitals').select('*').order('name'),
+    supabase.from('call_log').select('*, members(first_name, last_name)').order('call_date', { ascending: false }).order('created_at', { ascending: false }).limit(1000),
   ]);
 
   for (const result of [profiles, categories, locations, items, movements, auditLog]) {
     if (result.error) throw result.error;
   }
-  for (const result of [membersRes, vehiclesRes, checklistsRes, checklistItemsRes, hospitalsRes]) {
+  for (const result of [membersRes, vehiclesRes, checklistsRes, checklistItemsRes, hospitalsRes, callLogRes]) {
     if (result.error) console.warn('Extended table fetch warning:', result.error.message);
   }
 
@@ -75,6 +76,7 @@ export async function getAllData() {
     vehicles: vehiclesRes.data || [],
     checklists: (checklistsRes.data || []).map(c => ({ ...c, items: checklistMap[c.id] || [] })),
     hospitals: hospitalsRes.data || [],
+    callLog: callLogRes.data || [],
   };
 }
 
@@ -237,6 +239,30 @@ export async function deleteHospital(id, name) {
   const { error } = await supabase.from('hospitals').delete().eq('id', id);
   if (error) throw error;
   await addAudit('Deleted hospital', 'hospitals', id, name || id);
+}
+
+// ── Call Log ──────────────────────────────────────────────────────────────────
+const CALL_LOG_FIELDS = ['member_id', 'call_date', 'call_time', 'incident_number', 'call_type', 'location', 'disposition', 'notes'];
+
+function callLogPayload(input) {
+  return Object.fromEntries(CALL_LOG_FIELDS.map(k => [k, input[k]]).filter(([, v]) => v !== undefined));
+}
+
+export async function createCallLog(entry) {
+  const { data, error } = await supabase.from('call_log').insert(callLogPayload(entry)).select('*, members(first_name, last_name)').single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateCallLog(id, updates) {
+  const { data, error } = await supabase.from('call_log').update(callLogPayload(updates)).eq('id', id).select('*, members(first_name, last_name)').single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteCallLog(id) {
+  const { error } = await supabase.from('call_log').delete().eq('id', id);
+  if (error) throw error;
 }
 
 // ── Checklist Items ───────────────────────────────────────────────────────────

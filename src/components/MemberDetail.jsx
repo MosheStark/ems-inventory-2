@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ArrowLeft, Pencil, Save, User, X } from 'lucide-react';
-import { updateMember } from '../lib/api';
-import { canWrite } from '../lib/utils';
+import { ArrowLeft, Pencil, Plus, Save, User, X } from 'lucide-react';
+import { createCallLog, deleteCallLog, updateMember } from '../lib/api';
+import { canDelete, canWrite } from '../lib/utils';
+import { CALL_TYPES, DISPOSITIONS } from './CallLog';
 
 const STATUSES = ['Primary', 'Backup', 'Observer', 'Trainee', 'Inactive'];
 const CERT_LEVELS = ['None', 'Lay Responder', 'First Responder', 'EMT-B', 'AEMT', 'Paramedic', 'Other'];
@@ -22,11 +23,22 @@ const cardHead = { margin: '0 0 12px', fontSize: 13, textTransform: 'uppercase',
 const fLabel = { display: 'flex', flexDirection: 'column', gap: 4, fontSize: 13, fontWeight: 600, color: '#64748b' };
 const fValue = { fontWeight: 400, color: '#0f172a', fontSize: 14 };
 
-export default function MemberDetail({ member, profile, refresh, onBack }) {
+const blankCall = (memberId) => ({
+  member_id: memberId,
+  call_date: new Date().toISOString().slice(0, 10),
+  call_time: '', incident_number: '', call_type: '',
+  location: '', disposition: '', notes: '',
+});
+
+export default function MemberDetail({ member, callLog, profile, refresh, onBack }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ ...member });
   const [error, setError] = useState('');
+  const [addingCall, setAddingCall] = useState(false);
+  const [callForm, setCallForm] = useState(blankCall(member.id));
+  const [callError, setCallError] = useState('');
   const mayWrite = canWrite(profile.role);
+  const memberCalls = (callLog || []).filter(c => c.member_id === member.id);
 
   function f(key) { return editing ? form[key] : member[key]; }
   function set(key, val) { setForm(p => ({ ...p, [key]: val })); }
@@ -139,6 +151,72 @@ export default function MemberDetail({ member, profile, refresh, onBack }) {
           ? field('notes', 'textarea')
           : <p style={{ margin: 0, color: member.notes ? '#0f172a' : '#94a3b8', whiteSpace: 'pre-wrap', fontSize: 14 }}>{member.notes || 'No notes.'}</p>}
       </div>
+    </div>
+
+    {/* Call History */}
+    <div className="card">
+      <div className="section-head">
+        <h2 style={{ margin: 0 }}>Call History <span className="badge muted" style={{ fontSize: 13, marginLeft: 8 }}>{memberCalls.length}</span></h2>
+        {mayWrite && !addingCall && (
+          <button className="secondary" onClick={() => { setCallForm(blankCall(member.id)); setAddingCall(true); setCallError(''); }}>
+            <Plus size={16} /> Log Call
+          </button>
+        )}
+      </div>
+
+      {addingCall && (
+        <form className="grid-form" style={{ marginTop: 16 }} onSubmit={async e => {
+          e.preventDefault(); setCallError('');
+          try {
+            await createCallLog({ ...callForm, call_time: callForm.call_time || null, incident_number: callForm.incident_number || null, call_type: callForm.call_type || null, location: callForm.location || null, disposition: callForm.disposition || null, notes: callForm.notes || null });
+            setAddingCall(false); await refresh();
+          } catch (err) { setCallError(err.message); }
+        }}>
+          {callError && <div className="alert danger-text" style={{ gridColumn: 'span 4' }}>{callError}</div>}
+          <label style={fLabel}>Date<input type="date" value={callForm.call_date} onChange={e => setCallForm(p => ({ ...p, call_date: e.target.value }))} required /></label>
+          <label style={fLabel}>Time<input type="time" value={callForm.call_time} onChange={e => setCallForm(p => ({ ...p, call_time: e.target.value }))} /></label>
+          <input placeholder="Incident #" value={callForm.incident_number} onChange={e => setCallForm(p => ({ ...p, incident_number: e.target.value }))} />
+          <select value={callForm.call_type} onChange={e => setCallForm(p => ({ ...p, call_type: e.target.value }))}>
+            <option value="">Call type…</option>{CALL_TYPES.map(t => <option key={t}>{t}</option>)}
+          </select>
+          <select value={callForm.disposition} onChange={e => setCallForm(p => ({ ...p, disposition: e.target.value }))}>
+            <option value="">Disposition…</option>{DISPOSITIONS.map(d => <option key={d}>{d}</option>)}
+          </select>
+          <input className="span-2" placeholder="Location / Address" value={callForm.location} onChange={e => setCallForm(p => ({ ...p, location: e.target.value }))} />
+          <input className="span-4" placeholder="Notes" value={callForm.notes} onChange={e => setCallForm(p => ({ ...p, notes: e.target.value }))} />
+          <div style={{ gridColumn: 'span 4', display: 'flex', gap: 8 }}>
+            <button className="primary"><Save size={16} /> Save Call</button>
+            <button type="button" className="secondary" onClick={() => setAddingCall(false)}><X size={16} /> Cancel</button>
+          </div>
+        </form>
+      )}
+
+      {memberCalls.length === 0 && !addingCall
+        ? <p className="muted-text" style={{ marginTop: 12 }}>No calls logged yet.</p>
+        : <div className="table-wrap" style={{ marginTop: 16 }}>
+          <table style={{ minWidth: 600 }}>
+            <thead><tr><th>Date</th><th>Time</th><th>Incident #</th><th>Type</th><th>Location</th><th>Disposition</th><th>Notes</th><th>Actions</th></tr></thead>
+            <tbody>{memberCalls.map(c => (
+              <tr key={c.id}>
+                <td><b>{c.call_date}</b></td>
+                <td>{c.call_time || '—'}</td>
+                <td>{c.incident_number || '—'}</td>
+                <td>{c.call_type || '—'}</td>
+                <td>{c.location || '—'}</td>
+                <td>{c.disposition || '—'}</td>
+                <td>{c.notes || ''}</td>
+                <td><div className="actions">
+                  {canDelete(profile.role) && (
+                    <button className="icon" onClick={async () => {
+                      if (!confirm(`Delete call on ${c.call_date}?`)) return;
+                      await deleteCallLog(c.id); await refresh();
+                    }}><X size={16} /></button>
+                  )}
+                </div></td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>}
     </div>
   </div>;
 }

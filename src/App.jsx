@@ -8,12 +8,13 @@ import Members from './components/Members';
 import Vehicles from './components/Vehicles';
 import Checklists from './components/Checklists';
 import Hospitals from './components/Hospitals';
+import CallLog from './components/CallLog';
 import StockAdjustments from './components/StockAdjustments';
 import Alerts from './components/Alerts';
 import History from './components/History';
 import Settings from './components/Settings';
 
-const emptyData = { profiles: [], categories: [], locations: [], items: [], movements: [], auditLog: [], members: [], vehicles: [], checklists: [], hospitals: [] };
+const emptyData = { profiles: [], categories: [], locations: [], items: [], movements: [], auditLog: [], members: [], vehicles: [], checklists: [], hospitals: [], callLog: [] };
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -58,9 +59,10 @@ export default function App() {
     </header>
     {error && <div className="alert danger-text">{error}</div>}
     <Dashboard items={data.items} />
-    <nav className="tabs">{[['inventory','Inventory'],['members','Members'],['vehicles','Vehicles'],['hospitals','Hospitals'],['checklists','Checklists'],['adjust','Adjust Stock'],['alerts','Alerts'],['history','Movement History'],['audit','Audit Log'],['settings','Settings']].map(([k,l]) => <button key={k} className={activeTab===k?'active':''} onClick={() => setActiveTab(k)}>{l}</button>)}</nav>
+    <nav className="tabs">{[['inventory','Inventory'],['members','Members'],['vehicles','Vehicles'],['hospitals','Hospitals'],['calllog','Call Log'],['checklists','Checklists'],['adjust','Adjust Stock'],['alerts','Alerts'],['history','Movement History'],['audit','Audit Log'],['settings','Settings']].map(([k,l]) => <button key={k} className={activeTab===k?'active':''} onClick={() => setActiveTab(k)}>{l}</button>)}</nav>
     {activeTab === 'inventory' && <Inventory data={data} profile={profile} refresh={refresh} />}
-    {activeTab === 'members' && <Members members={data.members} profile={profile} refresh={refresh} />}
+    {activeTab === 'members' && <Members members={data.members} callLog={data.callLog} profile={profile} refresh={refresh} />}
+    {activeTab === 'calllog' && <CallLog callLog={data.callLog} members={data.members} profile={profile} refresh={refresh} />}
     {activeTab === 'vehicles' && <Vehicles vehicles={data.vehicles} profile={profile} refresh={refresh} />}
     {activeTab === 'hospitals' && <Hospitals hospitals={data.hospitals} profile={profile} refresh={refresh} />}
     {activeTab === 'checklists' && <Checklists checklists={data.checklists} profile={profile} refresh={refresh} />}

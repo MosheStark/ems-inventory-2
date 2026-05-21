@@ -45,7 +45,7 @@ function Avatar({ url, name, size = 32 }) {
   );
 }
 
-export default function Members({ members, profile, refresh }) {
+export default function Members({ members, callLog, profile, refresh }) {
   const [detailId, setDetailId] = useState(null);
   const [form, setForm] = useState(blank);
   const [query, setQuery] = useState('');
@@ -72,7 +72,7 @@ export default function Members({ members, profile, refresh }) {
   // Show detail view
   const detailMember = detailId ? members.find(m => m.id === detailId) : null;
   if (detailId && !detailMember) { setDetailId(null); return null; }
-  if (detailMember) return <MemberDetail member={detailMember} profile={profile} refresh={refresh} onBack={() => setDetailId(null)} />;
+  if (detailMember) return <MemberDetail member={detailMember} callLog={callLog} profile={profile} refresh={refresh} onBack={() => setDetailId(null)} />;
 
   function setField(f, v) { setForm(p => ({ ...p, [f]: v })); }
 
