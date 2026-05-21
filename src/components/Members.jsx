@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Eye, Mail, Pencil, Phone, Plus, Save, Trash2, X } from 'lucide-react';
+import { Eye, Mail, Pencil, Phone, Plus, Save, Trash2, Upload, X } from 'lucide-react';
 import { createMember, deleteMember, updateMember } from '../lib/api';
 import { canDelete, canWrite } from '../lib/utils';
 import MemberDetail from './MemberDetail';
+import MemberImport from './MemberImport';
 
 const STATUSES = ['Primary', 'Backup', 'Observer', 'Trainee', 'Inactive'];
 const CERT_LEVELS = ['None', 'Lay Responder', 'First Responder', 'EMT-B', 'AEMT', 'Paramedic', 'Other'];
@@ -55,6 +56,7 @@ export default function Members({ members, callLog, profile, refresh }) {
   const [outreachStatus, setOutreachStatus] = useState('All');
   const [outreachSubject, setOutreachSubject] = useState('');
   const [showPhones, setShowPhones] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const mayWrite = canWrite(profile.role);
 
   const filtered = useMemo(() =>
@@ -110,9 +112,14 @@ export default function Members({ members, callLog, profile, refresh }) {
   }
 
   return <div className="stack">
+    {showImport && <MemberImport onClose={() => setShowImport(false)} refresh={refresh} />}
+
     {/* Add form */}
     <div className="card">
-      <h2>Add Member</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h2 style={{ margin: 0 }}>Add Member</h2>
+        {mayWrite && <button className="secondary" onClick={() => setShowImport(true)}><Upload size={16} /> Import from CSV</button>}
+      </div>
       {error && <div className="alert danger-text">{error}</div>}
       <form className="grid-form" onSubmit={add}>
         <div style={sectionHead}>Contact Information</div>
