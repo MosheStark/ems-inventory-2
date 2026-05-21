@@ -21,6 +21,8 @@ const FIELDS = [
   { key: 'emergency_contact_phone', label: 'Emergency Contact Phone' },
   { key: 'notes',                   label: 'Notes' },
   { key: 'number_of_calls',         label: 'Number of Calls' },
+  { key: 'call_sign',               label: 'Call Sign' },
+  { key: 'hatzalah_web_id',         label: 'HatzalahWeb ID' },
 ];
 
 const ALIASES = {
@@ -42,6 +44,8 @@ const ALIASES = {
   emergency_contact_phone: ['emergency contact phone','ec phone','emergency phone'],
   notes:                   ['notes','note','comments','comment'],
   number_of_calls:         ['calls','number of calls','call count','total calls','num calls'],
+  call_sign:               ['call sign','callsign','unit','radio id','radio'],
+  hatzalah_web_id:         ['hatzalahweb id','hatzalah web id','web id','hwid','hatzalah id'],
 };
 
 const VALID_STATUSES    = ['Primary','Backup','Observer','Trainee','Inactive'];

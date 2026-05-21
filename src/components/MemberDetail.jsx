@@ -95,6 +95,12 @@ export default function MemberDetail({ member, callLog, profile, refresh, onBack
             </label>}
           </div>
           <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', fontSize: 14, color: '#64748b' }}>
+            {editing
+              ? <label style={{ ...fLabel, flexDirection: 'row', alignItems: 'center', gap: 6 }}>Call Sign<input value={form.call_sign || ''} onChange={e => set('call_sign', e.target.value)} style={{ width: 100 }} placeholder="e.g. M-12" /></label>
+              : member.call_sign && <span>Call Sign: <b style={{ color: '#0f172a', fontFamily: 'monospace' }}>{member.call_sign}</b></span>}
+            {editing
+              ? <label style={{ ...fLabel, flexDirection: 'row', alignItems: 'center', gap: 6 }}>HatzalahWeb ID<input value={form.hatzalah_web_id || ''} onChange={e => set('hatzalah_web_id', e.target.value)} style={{ width: 110 }} /></label>
+              : member.hatzalah_web_id && <span>HatzalahWeb ID: <b style={{ color: '#0f172a' }}>{member.hatzalah_web_id}</b></span>}
             <span>Calls: {editing
               ? <input type="number" min="0" style={{ width: 70, display: 'inline-block', padding: '2px 8px' }} value={form.number_of_calls ?? 0} onChange={e => set('number_of_calls', Number(e.target.value))} />
               : <b style={{ color: '#0f172a' }}>{member.number_of_calls || 0}</b>}

@@ -24,6 +24,7 @@ const blank = {
   emergency_contact_name: '', emergency_contact_phone: '',
   status: 'Trainee', notes: '',
   avatar_url: '', number_of_calls: 0, oos: false,
+  call_sign: '', hatzalah_web_id: '',
 };
 
 function coerceDates(m) {
@@ -134,6 +135,8 @@ export default function Members({ members, callLog, profile, refresh }) {
         <select disabled={!mayWrite} value={form.status} onChange={e => setField('status', e.target.value)}>
           {STATUSES.map(s => <option key={s}>{s}</option>)}
         </select>
+        <input disabled={!mayWrite} placeholder="Call Sign (e.g. M-12)" value={form.call_sign} onChange={e => setField('call_sign', e.target.value)} />
+        <input disabled={!mayWrite} placeholder="HatzalahWeb ID" value={form.hatzalah_web_id} onChange={e => setField('hatzalah_web_id', e.target.value)} />
 
         <div style={sectionHead}>EMS Information</div>
         <label style={fLabel}>Date of Birth<input disabled={!mayWrite} type="date" value={form.date_of_birth} onChange={e => setField('date_of_birth', e.target.value)} /></label>
@@ -171,7 +174,7 @@ export default function Members({ members, callLog, profile, refresh }) {
     <div className="card table-wrap">
       <table>
         <thead><tr>
-          <th>Name</th><th>Status</th><th>Contact</th>
+          <th>Name</th><th>Call Sign</th><th>Status</th><th>Contact</th>
           <th>Certification</th><th>Cert Exp.</th><th>Calls</th><th>Actions</th>
         </tr></thead>
         <tbody>{filtered.map(m => {
@@ -186,6 +189,13 @@ export default function Members({ members, callLog, profile, refresh }) {
                     : <><b>{m.first_name} {m.last_name}</b>{m.date_joined && <small>Joined {new Date(m.date_joined + 'T00:00:00').toLocaleDateString()}</small>}</>}
                 </div>
               </div>
+            </td>
+            <td>
+              {editing?.id === m.id
+                ? <input value={row.call_sign || ''} onChange={e => setEditing({ ...row, call_sign: e.target.value })} placeholder="Call Sign" style={{ width: 90 }} />
+                : <span style={{ fontWeight: 600, fontFamily: 'monospace' }}>{m.call_sign || '—'}</span>}
+              {!editing && m.hatzalah_web_id && <small style={{ display: 'block', color: '#94a3b8' }}>ID: {m.hatzalah_web_id}</small>}
+              {editing?.id === m.id && <input value={row.hatzalah_web_id || ''} onChange={e => setEditing({ ...row, hatzalah_web_id: e.target.value })} placeholder="Web ID" style={{ width: 90, marginTop: 4 }} />}
             </td>
             <td>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

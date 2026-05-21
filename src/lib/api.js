@@ -152,7 +152,7 @@ const MEMBER_FIELDS = [
   'first_name', 'last_name', 'email', 'phone', 'address', 'city', 'state', 'zip',
   'date_of_birth', 'date_joined', 'cert_level', 'cert_number', 'cert_expiration',
   'emergency_contact_name', 'emergency_contact_phone', 'status', 'notes',
-  'avatar_url', 'number_of_calls', 'oos',
+  'avatar_url', 'number_of_calls', 'oos', 'call_sign', 'hatzalah_web_id',
 ];
 
 function memberPayload(input) {
