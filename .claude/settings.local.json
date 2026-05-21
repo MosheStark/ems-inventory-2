@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(node_modules\\\\.bin\\\\tsc --noEmit)",
+      "Bash(./node_modules/.bin/tsc *)",
+      "mcp__ide__getDiagnostics",
+      "Read(//mnt/c/Users/mstar/source/repos/**)",
+      "Bash(node_modules/.bin/vite build *)",
+      "Bash(supabase --version)",
+      "Bash(npx supabase *)",
+      "Bash(node_modules/.bin/vite --port 5173)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git *)"
+    ]
+  }
+}
