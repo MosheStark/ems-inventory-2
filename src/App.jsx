@@ -13,6 +13,7 @@ import StockAdjustments from './components/StockAdjustments';
 import Alerts from './components/Alerts';
 import History from './components/History';
 import Settings from './components/Settings';
+import Reports from './components/Reports';
 
 const emptyData = { profiles: [], categories: [], locations: [], items: [], movements: [], auditLog: [], members: [], vehicles: [], checklists: [], hospitals: [], callLog: [] };
 
@@ -59,7 +60,7 @@ export default function App() {
     </header>
     {error && <div className="alert danger-text">{error}</div>}
     <Dashboard items={data.items} />
-    <nav className="tabs">{[['inventory','Inventory'],['members','Members'],['vehicles','Vehicles'],['hospitals','Hospitals'],['calllog','Call Log'],['checklists','Checklists'],['adjust','Adjust Stock'],['alerts','Alerts'],['history','Movement History'],['audit','Audit Log'],['settings','Settings']].map(([k,l]) => <button key={k} className={activeTab===k?'active':''} onClick={() => setActiveTab(k)}>{l}</button>)}</nav>
+    <nav className="tabs">{[['inventory','Inventory'],['members','Members'],['vehicles','Vehicles'],['hospitals','Hospitals'],['calllog','Call Log'],['checklists','Checklists'],['adjust','Adjust Stock'],['alerts','Alerts'],['history','Movement History'],['audit','Audit Log'],['reports','Reports'],['settings','Settings']].map(([k,l]) => <button key={k} className={activeTab===k?'active':''} onClick={() => setActiveTab(k)}>{l}</button>)}</nav>
     {activeTab === 'inventory' && <Inventory data={data} profile={profile} refresh={refresh} />}
     {activeTab === 'members' && <Members members={data.members} callLog={data.callLog} profile={profile} refresh={refresh} />}
     {activeTab === 'calllog' && <CallLog callLog={data.callLog} members={data.members} profile={profile} refresh={refresh} />}
@@ -70,6 +71,7 @@ export default function App() {
     {activeTab === 'alerts' && <Alerts items={data.items} />}
     {activeTab === 'history' && <History rows={data.movements} />}
     {activeTab === 'audit' && <History rows={data.auditLog} type="audit" />}
+    {activeTab === 'reports' && <Reports callLog={data.callLog} members={data.members} />}
     {activeTab === 'settings' && <Settings data={data} profile={profile} refresh={refresh} />}
   </main>;
 }
